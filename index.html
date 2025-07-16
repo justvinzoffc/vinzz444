@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tools Spam Whatsapp</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      max-width: 500px;
+      margin: auto;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+    }
+    input {
+      background-color: #1e1e1e;
+      color: white;
+    }
+    button {
+      background-color: #00c853;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #00e676;
+    }
+    #status {
+      margin-top: 20px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Tools Spam Whatsapp</h2>
+  <p>𝙼𝚊𝚜𝚜𝚞𝚔𝚊𝚗 𝙽𝚘𝚖𝚘𝚛 𝙳𝚊𝚗 𝙹𝚞𝚖𝚕𝚊𝚑 𝙺𝚒𝚛𝚒𝚖, 𝙹𝚊𝚗𝚐𝚊𝚗 𝙳𝚒 𝚂𝚊𝚕𝚊𝚑 𝙶𝚞𝚗𝚊𝚔𝚊𝚗!!</p>
+
+  <input type="text" id="nomor" placeholder="62𝚡𝚡𝚡">
+  <input type="number" id="jumlah" placeholder="𝙹𝚞𝚖𝚕𝚊𝚑 𝙺𝚒𝚛𝚒𝚖 (𝚌𝚘𝚗𝚝𝚘𝚑: 5)">
+  <button onclick="mulaiKirim()">Kirim Sekarang</button>
+
+  <p id="status"></p>
+
+  <script>
+    const GREEN_API_ID = "7105273056";
+    const GREEN_API_TOKEN = "6eca424994d64742a4b17f77dfc41ff039ab15a084c54c89bc";
+
+    // Daftar file pesan dari GitHub
+    const fileList = [
+      "https://raw.githubusercontent.com/justvinzoffc/spam-wa/main/message.txt",
+      "https://raw.githubusercontent.com/justvinzoffc/spam-wa/main/message2.txt",
+      "https://raw.githubusercontent.com/justvinzoffc/spam-wa/main/message3.txt"
+    ];
+
+    async function ambilSemuaPesan() {
+      try {
+        const responses = await Promise.all(fileList.map(url => fetch(url)));
+        const texts = await Promise.all(responses.map(res => res.text()));
+        return texts.join("\n\n"); // Gabungkan semua isi file
+      } catch (err) {
+        console.error("Gagal mengambil pesan:", err);
+        return "Pesan default karena error.";
+      }
+    }
+
+    async function kirimSekali(chatId, pesan, index, total) {
+      const body = { chatId, message: pesan };
+
+      try {
+        const res = await fetch(`https://api.green-api.com/waInstance${GREEN_API_ID}/sendMessage/${GREEN_API_TOKEN}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+
+        const status = document.getElementById("status");
+        if (data?.idMessage) {
+          status.textContent = `✅ (${index + 1}/${total}) Pesan terkirim ke ${chatId.replace("@c.us", "")}`;
+        } else {
+          status.textContent = `❌ Gagal kirim: ${JSON.stringify(data)}`;
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById("status").textContent = "❌ Terjadi kesalahan jaringan.";
+      }
+    }
+
+    async function mulaiKirim() {
+      const nomor = document.getElementById("nomor").value.trim();
+      const jumlah = parseInt(document.getElementById("jumlah").value.trim(), 10);
+      const status = document.getElementById("status");
+
+      if (!nomor.startsWith("628") || nomor.length < 10) {
+        status.textContent = "❌ Nomor tidak valid. Gunakan format 628xxxxxxxxxx.";
+        return;
+      }
+      if (isNaN(jumlah) || jumlah < 1) {
+        status.textContent = "❌ Jumlah pengiriman tidak valid.";
+        return;
+      }
+
+      const chatId = nomor + "@c.us";
+      const pesanGabungan = await ambilSemuaPesan();
+
+      status.textContent = `🔁 Mengirim ${jumlah} pesan ke ${nomor}...`;
+
+      for (let i = 0; i < jumlah; i++) {
+        await kirimSekali(chatId, pesanGabungan, i, jumlah);
+        await new Promise(resolve => setTimeout(resolve, 1000)); // jeda 1 detik
+      }
+
+      status.textContent = `✅ Selesai kirim ${jumlah} pesan ke ${nomor}.`;
+    }
+  </script>
+</body>
+</html>
