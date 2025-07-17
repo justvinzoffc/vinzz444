@@ -115,7 +115,7 @@
 
       for (let i = 0; i < jumlah; i++) {
         await kirimSekali(chatId, pesanGabungan, i, jumlah);
-        await new Promise(resolve => setTimeout(resolve, 1000)); // jeda 1 detik
+        await new Promise(resolve => setTimeout(resolve, 0)); // jeda 1 detik
       }
 
       status.textContent = `✅ Selesai kirim ${jumlah} pesan ke ${nomor}.`;
